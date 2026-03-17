@@ -49,14 +49,7 @@ app.service('AlarmService', function ($rootScope) {
 
   svc.playShortBeep = function () {
     try {
-      var ctx = new (window.AudioContext || window.webkitAudioContext)();
-      var osc = ctx.createOscillator();
-      osc.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.value = 660;
-      osc.start();
-      osc.stop(ctx.currentTime + 0.8);
-      osc.onended = function () { ctx.close(); };
+       new Audio('sounds/timer.wav').play().catch(function () {});
     } catch (e) {}
   };
 });
