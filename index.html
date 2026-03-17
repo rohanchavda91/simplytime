@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="clockApp">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SimplyTime</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body ng-controller="AppController">
+
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+
+  <div class="shell">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-name">SimplyTime</span>
+      </div>
+      <nav class="nav">
+        <button class="nav-btn" ng-class="{active:activeTab==='clock'}"     ng-click="setTab('clock')">
+          <span class="nav-icon"><img src="./svg/clock.svg" alt="Clock" height="15px" width="15px"></span><span class="nav-label">Clock</span>
+        </button>
+        <button class="nav-btn" ng-class="{active:activeTab==='stopwatch'}" ng-click="setTab('stopwatch')">
+          <span class="nav-icon"><img src="./svg/stopwatch.svg" alt="Stopwatch" height="15px" width="15px"></span><span class="nav-label">Stopwatch</span>
+        </button>
+        <button class="nav-btn" ng-class="{active:activeTab==='timer'}"     ng-click="setTab('timer')">
+          <span class="nav-icon"><img src="./svg/timer.svg" alt="Timer" height="15px" width="15px"></span><span class="nav-label">Timer</span>
+        </button>
+        <button class="nav-btn" ng-class="{active:activeTab==='alarm'}"     ng-click="setTab('alarm')">
+          <span class="nav-icon"><img src="./svg/alarm-clock.svg" alt="Alarm" height="15px" width="15px"></span><span class="nav-label">Alarm</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="date-display">{{todayDate}}</span>
+        <div class="global-toggle">
+          <button class="gtoggle-btn" ng-class="{active:clockMode==='digital'}" ng-click="clockMode='digital'">Digital</button>
+          <button class="gtoggle-btn" ng-class="{active:clockMode==='analog'}"  ng-click="clockMode='analog'">Analog</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Content ── -->
+    <main class="content">
+
+      <!-- ════ CLOCK ════ -->
+      <section class="panel" ng-show="activeTab==='clock'" ng-controller="ClockController">
+        <div class="panel-header">
+          <h1 class="panel-title">Current Time</h1>
+        </div>
+
+        <div class="card clock-digital" ng-show="clockMode==='digital'">
+          <div class="time-big">{{digitalTime}}</div>
+          <div class="time-date">{{dateStr}}</div>
+          <div class="time-tz">{{timezone}}</div>
+        </div>
+
+        <div class="card clock-analog" ng-show="clockMode==='analog'">
+          <div class="analog-wrap">
+            <svg class="clock-svg" viewBox="0 0 200 200">
+              <g ng-repeat="i in ticks" ng-attr-transform="rotate({{i*30}},100,100)">
+                <line x1="100" y1="12" x2="100" y2="22"
+                      ng-attr-stroke-width="{{i%3===0?2.5:1}}"
+                      stroke="rgba(255,255,255,0.4)" stroke-linecap="round"/>
+              </g>
+              <text ng-repeat="n in [12,1,2,3,4,5,6,7,8,9,10,11]"
+                    ng-attr-x="{{100+72*sin($index*30*pi/180)}}"
+                    ng-attr-y="{{100-72*cos($index*30*pi/180)+4}}"
+                    text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="DM Sans">{{n}}</text>
+              <circle cx="100" cy="100" r="58" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+              <line x1="100" y1="100" x2="100" y2="52" ng-attr-transform="rotate({{hourAngle}},100,100)"   stroke="#e2e8f0" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="100" y1="100" x2="100" y2="38" ng-attr-transform="rotate({{minuteAngle}},100,100)" stroke="#94e2ff" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="100" y1="110" x2="100" y2="28" ng-attr-transform="rotate({{secondAngle}},100,100)" stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="100" cy="100" r="4" fill="#ff6b6b"/>
+              <circle cx="100" cy="100" r="2" fill="#fff"/>
+            </svg>
+          </div>
+          <div class="time-date">{{dateStr}}</div>
+        </div>
+      </section>
+
+      <!-- ════ STOPWATCH ════ -->
+      <section class="panel" ng-show="activeTab==='stopwatch'" ng-controller="StopwatchController">
+        <div class="panel-header">
+          <h1 class="panel-title">Stopwatch</h1>
+          <span class="status-pill" ng-class="{running:swRunning,paused:!swRunning&&swTime>0}">
+            {{swRunning?'Running':(swTime>0?'Paused':'Ready')}}
+          </span>
+        </div>
+
+        <!-- Digital -->
+        <div class="card sw-card" ng-show="clockMode==='digital'">
+          <div class="sw-display">
+            <span class="sw-unit">{{swHH}}</span>
+            <span class="sw-sep">:</span>
+            <span class="sw-unit">{{swMM}}</span>
+            <span class="sw-sep">:</span>
+            <span class="sw-unit">{{swSS}}</span>
+            <span class="sw-sep small">.</span>
+            <span class="sw-unit small">{{swMS}}</span>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" ng-style="{width:(swTime%60000)/600+'%'}"></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-success" ng-show="!swRunning&&swTime===0" ng-click="startSW()">Start</button>
+            <button class="btn btn-warning" ng-show="swRunning"              ng-click="pauseSW()">Pause</button>
+            <button class="btn btn-success" ng-show="!swRunning&&swTime>0"   ng-click="resumeSW()">Resume</button>
+            <button class="btn btn-danger"  ng-show="swTime>0"               ng-click="resetSW()">Reset</button>
+          </div>
+        </div>
+
+        <!-- Analog — sweep dial -->
+        <div class="card sw-card" ng-show="clockMode==='analog'">
+          <div class="analog-wrap">
+            <svg class="clock-svg" viewBox="0 0 200 200">
+              <!-- 60 tick marks -->
+              <g ng-repeat="i in swTicks60" ng-attr-transform="rotate({{i*6}},100,100)">
+                <line x1="100" y1="10" x2="100" y2="{{i%5===0?22:16}}"
+                      ng-attr-stroke-width="{{i%5===0?2:0.8}}"
+                      stroke="rgba(255,255,255,0.35)" stroke-linecap="round"/>
+              </g>
+              <!-- 5-second labels -->
+              <text ng-repeat="n in [0,5,10,15,20,25,30,35,40,45,50,55]"
+                    ng-attr-x="{{100+72*sin($index*30*pi/180)}}"
+                    ng-attr-y="{{100-72*cos($index*30*pi/180)+4}}"
+                    text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="DM Sans">{{n}}</text>
+              <!-- Elapsed-seconds arc -->
+              <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(148,226,255,0.1)" stroke-width="6"/>
+              <circle cx="100" cy="100" r="80" fill="none"
+                      stroke="#94e2ff" stroke-width="6" stroke-linecap="round"
+                      stroke-dasharray="502.65"
+                      ng-attr-stroke-dashoffset="{{502.65-502.65*swSecFrac}}"
+                      transform="rotate(-90 100 100)"
+                      style="transition:stroke-dashoffset 0.1s linear"/>
+              <!-- Minute hand (elapsed minutes) -->
+              <line x1="100" y1="100" x2="100" y2="48"
+                    ng-attr-transform="rotate({{swMinAngle}},100,100)"
+                    stroke="#e2e8f0" stroke-width="3" stroke-linecap="round"/>
+              <!-- Sweep second hand -->
+              <line x1="100" y1="112" x2="100" y2="26"
+                    ng-attr-transform="rotate({{swSecAngle}},100,100)"
+                    stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- Center readout -->
+              <text x="100" y="96"  text-anchor="middle" fill="#fff"                  font-size="15" font-family="Share Tech Mono">{{swMM}}:{{swSS}}</text>
+              <text x="100" y="112" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9"  font-family="DM Sans">elapsed</text>
+              <circle cx="100" cy="100" r="4" fill="#ff6b6b"/>
+              <circle cx="100" cy="100" r="2" fill="#fff"/>
+            </svg>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-success" ng-show="!swRunning&&swTime===0" ng-click="startSW()">Start</button>
+            <button class="btn btn-warning" ng-show="swRunning"              ng-click="pauseSW()">Pause</button>
+            <button class="btn btn-success" ng-show="!swRunning&&swTime>0"   ng-click="resumeSW()">Resume</button>
+            <button class="btn btn-danger"  ng-show="swTime>0"               ng-click="resetSW()">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ TIMER ════ -->
+      <section class="panel" ng-show="activeTab==='timer'" ng-controller="TimerController">
+        <div class="panel-header">
+          <h1 class="panel-title">Countdown Timer</h1>
+          <span class="status-pill" ng-class="{running:timerRunning,done:timerDone}">
+            {{timerDone?'Done!':(timerRunning?'Running':'Set Time')}}
+          </span>
+        </div>
+
+        <!-- Input (shown only before start, mode-independent) -->
+        <div class="card timer-input-card" ng-show="!timerRunning&&!timerDone&&timerRemaining===0">
+          <div class="timer-input-row">
+            <div class="time-field">
+              <input type="number" min="0" max="99" ng-model="timerH" placeholder="00"/>
+              <label>Hours</label>
+            </div>
+            <span class="sep-colon">:</span>
+            <div class="time-field">
+              <input type="number" min="0" max="59" ng-model="timerM" placeholder="00"/>
+              <label>Minutes</label>
+            </div>
+            <span class="sep-colon">:</span>
+            <div class="time-field">
+              <input type="number" min="0" max="59" ng-model="timerS" placeholder="00"/>
+              <label>Seconds</label>
+            </div>
+          </div>
+          <div class="btn-row" style="margin-top:24px">
+            <button class="btn btn-success" ng-click="startTimer()">Start</button>
+          </div>
+        </div>
+
+        <!-- Digital countdown -->
+        <div class="card timer-card" ng-show="clockMode==='digital'&&(timerRunning||timerDone||timerRemaining>0)">
+          <div class="ring-wrap">
+            <svg class="ring-svg" viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="84" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+              <circle cx="100" cy="100" r="84" fill="none"
+                      stroke="{{timerDone?'#ff6b6b':'#94e2ff'}}"
+                      stroke-width="8" stroke-linecap="round"
+                      stroke-dasharray="528"
+                      ng-attr-stroke-dashoffset="{{528-528*timerProgress}}"
+                      transform="rotate(-90 100 100)"
+                      style="transition:stroke-dashoffset 1s linear,stroke 0.5s ease"/>
+              <text x="100" y="93"  text-anchor="middle" fill="#fff"                  font-size="28" font-family="Share Tech Mono">{{timerDisplay}}</text>
+              <text x="100" y="116" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="11" font-family="DM Sans">{{timerDone?"Time's up!":'remaining'}}</text>
+            </svg>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-warning" ng-show="timerRunning"                               ng-click="pauseTimer()">Pause</button>
+            <button class="btn btn-success" ng-show="!timerRunning&&timerRemaining>0&&!timerDone" ng-click="resumeTimer()">Resume</button>
+            <button class="btn btn-danger"  ng-show="timerRemaining>0||timerDone"                ng-click="resetTimer()">Reset</button>
+          </div>
+        </div>
+
+        <!-- Analog countdown — full clock face with remaining time on hands -->
+        <div class="card timer-card" ng-show="clockMode==='analog'&&(timerRunning||timerDone||timerRemaining>0)">
+          <div class="analog-wrap">
+            <svg class="clock-svg" viewBox="0 0 200 200">
+              <!-- Tick marks -->
+              <g ng-repeat="i in ticks12" ng-attr-transform="rotate({{i*30}},100,100)">
+                <line x1="100" y1="12" x2="100" y2="22"
+                      ng-attr-stroke-width="{{i%3===0?2.5:1}}"
+                      stroke="rgba(255,255,255,0.35)" stroke-linecap="round"/>
+              </g>
+              <!-- Hour labels -->
+              <text ng-repeat="n in [12,1,2,3,4,5,6,7,8,9,10,11]"
+                    ng-attr-x="{{100+72*sin($index*30*pi/180)}}"
+                    ng-attr-y="{{100-72*cos($index*30*pi/180)+4}}"
+                    text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="10" font-family="DM Sans">{{n}}</text>
+              <!-- Remaining arc -->
+              <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/>
+              <circle cx="100" cy="100" r="80" fill="none"
+                      stroke="{{timerDone?'#ff6b6b':'#6bffb8'}}"
+                      stroke-width="5" stroke-linecap="round"
+                      stroke-dasharray="502.65"
+                      ng-attr-stroke-dashoffset="{{502.65-502.65*timerProgress}}"
+                      transform="rotate(-90 100 100)"
+                      style="transition:stroke-dashoffset 1s linear"/>
+              <!-- Hour hand — remaining hours -->
+              <line x1="100" y1="100" x2="100" y2="52"
+                    ng-attr-transform="rotate({{timerHourAngle}},100,100)"
+                    stroke="#e2e8f0" stroke-width="3.5" stroke-linecap="round"/>
+              <!-- Minute hand — remaining minutes -->
+              <line x1="100" y1="100" x2="100" y2="36"
+                    ng-attr-transform="rotate({{timerMinAngle}},100,100)"
+                    stroke="#94e2ff" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Second hand — remaining seconds -->
+              <line x1="100" y1="112" x2="100" y2="26"
+                    ng-attr-transform="rotate({{timerSecAngle}},100,100)"
+                    stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="100" cy="100" r="4" fill="#ff6b6b"/>
+              <circle cx="100" cy="100" r="2" fill="#fff"/>
+            </svg>
+          </div>
+          <div class="timer-remaining-label">{{timerDisplay}} remaining</div>
+          <div class="btn-row">
+            <button class="btn btn-warning" ng-show="timerRunning"                               ng-click="pauseTimer()">Pause</button>
+            <button class="btn btn-success" ng-show="!timerRunning&&timerRemaining>0&&!timerDone" ng-click="resumeTimer()">Resume</button>
+            <button class="btn btn-danger"  ng-show="timerRemaining>0||timerDone"                ng-click="resetTimer()">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ ALARM ════ -->
+      <section class="panel" ng-show="activeTab==='alarm'" ng-controller="AlarmController">
+        <div class="panel-header">
+          <h1 class="panel-title">Alarms</h1>
+          <div class="mini-clock" ng-controller="MiniClockController">
+            <div class="mini-digital" ng-show="clockMode==='digital'">{{miniTime}}</div>
+            <svg class="mini-analog" viewBox="0 0 60 60" ng-show="clockMode==='analog'">
+              <circle cx="30" cy="30" r="28" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+              <line x1="30" y1="30" x2="30" y2="14" ng-attr-transform="rotate({{hourAngle}},30,30)"   stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="30" y1="30" x2="30" y2="10" ng-attr-transform="rotate({{minuteAngle}},30,30)" stroke="#94e2ff" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="30" y1="33" x2="30" y2="8"  ng-attr-transform="rotate({{secondAngle}},30,30)" stroke="#ff6b6b" stroke-width="1"   stroke-linecap="round"/>
+              <circle cx="30" cy="30" r="2" fill="#ff6b6b"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card add-alarm-card">
+          <h3 class="card-sub">Set New Alarm</h3>
+          <div class="alarm-input-row">
+            <input type="time" ng-model="newAlarmTime" class="alarm-time-input"/>
+            <input type="text" ng-model="newAlarmLabel" placeholder="Label (optional)" class="alarm-label-input"/>
+            <button class="btn btn-primary" ng-click="addAlarm()">+ Add</button>
+          </div>
+        </div>
+
+        <div class="alarm-list" ng-show="alarms.length>0">
+          <div class="alarm-item" ng-repeat="alarm in alarms" ng-class="{disabled:!alarm.enabled,ringing:alarm.ringing}">
+            <div class="alarm-info">
+              <span class="alarm-time-display">{{alarm.time}}</span>
+              <span class="alarm-label-text">{{alarm.label||'Alarm'}}</span>
+            </div>
+            <div class="alarm-controls">
+              <label class="toggle-switch">
+                <input type="checkbox" ng-model="alarm.enabled"/>
+                <span class="slider"></span>
+              </label>
+              <button class="btn btn-sm btn-danger" ng-click="deleteAlarm($index)">✕</button>
+            </div>
+          </div>
+        </div>
+        <div class="empty-state" ng-show="alarms.length===0">No alarms set yet.</div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Alarm popup -->
+  <div class="alarm-popup" ng-show="alarmRinging" ng-controller="AlarmPopupController">
+    <div class="popup-card">
+      <div class="popup-icon">🔔</div>
+      <div class="popup-title">Alarm!</div>
+      <div class="popup-time">{{ringingAlarmTime}}</div>
+      <div class="popup-label">{{ringingAlarmLabel}}</div>
+      <button class="btn btn-primary" ng-click="dismissAlarm()">Dismiss</button>
+    </div>
+  </div>
+
+  <script src="./angular.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

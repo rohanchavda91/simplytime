@@ -1,0 +1,269 @@
+/* ============================================================
+   ChronoDesk — Dark Glassmorphism UI
+   ============================================================ */
+
+:root {
+  --bg:          #0b0f1a;
+  --surface:     rgba(255,255,255,0.055);
+  --surface-hov: rgba(255,255,255,0.09);
+  --border:      rgba(255,255,255,0.1);
+  --accent:      #94e2ff;
+  --accent2:     #ff6b6b;
+  --accent3:     #6bffb8;
+  --text:        #e8edf5;
+  --text-muted:  rgba(232,237,245,0.45);
+  --radius:      18px;
+  --radius-sm:   10px;
+  --font-mono:   'Share Tech Mono', monospace;
+  --font-body:   'DM Sans', sans-serif;
+  --sidebar-w:   220px;
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.07) inset;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Background orbs ── */
+.bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.18; pointer-events: none; z-index: 0; }
+.orb1   { width: 420px; height: 420px; background: #2563eb; top: -80px;   left: -100px; }
+.orb2   { width: 350px; height: 350px; background: #7c3aed; bottom: -60px; right: -80px; }
+.orb3   { width: 260px; height: 260px; background: #0891b2; top: 40%; left: 40%; animation: drift 12s ease-in-out infinite alternate; }
+@keyframes drift { from { transform: translate(0,0); } to { transform: translate(60px,-40px); } }
+
+/* ── Shell ── */
+.shell { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 28px 16px 24px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 28px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.brand-icon { font-size: 22px; }
+.brand-name { font-family: var(--font-mono); font-size: 15px; letter-spacing: 0.04em; color: var(--accent); }
+
+.nav { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.nav-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-radius: var(--radius-sm);
+  border: 1px solid transparent; background: transparent;
+  color: var(--text-muted); font-family: var(--font-body); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; width: 100%; text-align: left;
+}
+.nav-btn:hover  { background: var(--surface-hov); color: var(--text); border-color: var(--border); }
+.nav-btn.active { background: rgba(148,226,255,0.12); color: var(--accent); border-color: rgba(148,226,255,0.25); }
+.nav-icon { font-size: 16px; }
+
+/* ── Sidebar footer + global toggle ── */
+.sidebar-footer { padding-top: 20px; border-top: 1px solid var(--border); margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+.date-display   { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+.global-toggle  { display: flex; flex-direction: column; gap: 4px; }
+.gtoggle-btn {
+  width: 100%; text-align: left; padding: 7px 10px; font-size: 12px;
+  border-radius: 7px; border: 1px solid transparent;
+  background: transparent; color: var(--text-muted);
+  font-family: var(--font-body); font-weight: 500; cursor: pointer; transition: all 0.2s;
+}
+.gtoggle-btn.active { background: rgba(148,226,255,0.12); color: var(--accent); border-color: rgba(148,226,255,0.25); }
+
+/* ── Main content ── */
+.content { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 40px 32px; min-height: 100vh; }
+
+/* ── Panel ── */
+.panel { width: 100%; max-width: 640px; animation: fadeUp 0.35s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
+.panel-title  { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 36px 32px; box-shadow: var(--card-shadow);
+  transition: min-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow  0.4s ease;
+}
+.clock-digital   { min-height: 180px; }
+.clock-analog    { min-height: 320px; }
+.sw-card         { min-height: 260px; }
+.timer-input-card{ min-height: 160px; }
+.timer-card      { min-height: 320px; }
+
+/* ── Digital Clock ── */
+.clock-digital { text-align: center; }
+.time-big  { font-family: var(--font-mono); font-size: clamp(52px,10vw,80px); letter-spacing: 0.04em; color: #fff; text-shadow: 0 0 40px rgba(148,226,255,0.4); line-height: 1; margin-bottom: 16px; }
+.time-date { font-size: 15px; color: var(--text-muted); margin-top: 8px; }
+.time-tz   { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 4px; opacity: 0.6; }
+
+/* ── Analog Clock shared ── */
+.clock-analog, .sw-card, .timer-card { text-align: center; }
+.analog-wrap { display: flex; justify-content: center; margin-bottom: 12px; }
+.clock-svg   { width: 240px; height: 240px; filter: drop-shadow(0 0 24px rgba(148,226,255,0.15)); }
+
+/* Clock hand CSS transitions (sweep-in animation) */
+.clock-svg .hand {
+  transition: transform 0.5s cubic-bezier(0.34, 1.10, 0.64, 1);
+}
+
+/* ── Mode-panel ng-animate fade+slide on digital↔analog switch ── */
+.mode-panel.ng-hide-add    { animation: modeFadeOut 0.22s ease forwards; }
+.mode-panel.ng-hide-remove { animation: modeFadeIn  0.30s ease forwards; }
+@keyframes modeFadeOut {
+  from { opacity: 1; transform: translateY(0);    }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes modeFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ── Stopwatch digital ── */
+.sw-card { text-align: center; }
+.sw-display { display: flex; align-items: baseline; justify-content: center; gap: 4px; margin-bottom: 24px; }
+.sw-unit { font-family: var(--font-mono); font-size: clamp(40px,8vw,64px); color: #fff; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; min-width: 90px; text-align: center; line-height: 1; }
+.sw-unit.small { font-size: clamp(24px,4vw,36px); min-width: 60px; color: var(--accent); }
+.sw-sep { font-family: var(--font-mono); font-size: 48px; color: var(--text-muted); line-height: 1; }
+.sw-sep.small { font-size: 28px; }
+
+.progress-bar-wrap { background: rgba(255,255,255,0.07); border-radius: 4px; height: 4px; margin-bottom: 28px; overflow: hidden; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 4px; transition: width 0.1s linear; box-shadow: 0 0 8px rgba(148,226,255,0.5); }
+
+/* ── Timer input ── */
+.timer-input-card { text-align: center; }
+.timer-input-row  { display: flex; align-items: flex-end; justify-content: center; gap: 8px; }
+.time-field       { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.time-field input {
+  width: 80px; padding: 14px 10px; border-radius: 12px;
+  border: 1px solid var(--border); background: rgba(255,255,255,0.06);
+  color: var(--text); font-family: var(--font-mono); font-size: 28px; text-align: center;
+  outline: none; transition: border-color 0.2s; 
+  appearance: textfield; -moz-appearance: textfield; -webkit-appearance: none;
+}
+.time-field input::-webkit-outer-spin-button,
+.time-field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.time-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(148,226,255,0.15); }
+.time-field label { font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.sep-colon { font-family: var(--font-mono); font-size: 32px; color: var(--text-muted); margin-bottom: 22px; }
+
+/* ── Timer digital ring ── */
+.timer-card { text-align: center; }
+.ring-wrap  { display: flex; justify-content: center; margin-bottom: 24px; }
+.ring-svg   { width: 220px; height: 220px; filter: drop-shadow(0 0 20px rgba(148,226,255,0.12)); }
+
+/* ── Timer analog remaining label ── */
+.timer-remaining-label { font-family: var(--font-mono); font-size: 14px; color: var(--text-muted); margin-bottom: 20px; letter-spacing: 0.04em; }
+
+/* ── Alarm ── */
+.add-alarm-card  { margin-bottom: 20px; }
+.card-sub { font-size: 13px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 16px; }
+.alarm-input-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.alarm-time-input {
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: rgba(255,255,255,0.07);
+  color: var(--text); font-family: var(--font-mono); font-size: 18px;
+  outline: none; transition: border-color 0.2s; color-scheme: dark;
+}
+.alarm-time-input:focus { border-color: var(--accent); }
+.alarm-label-input {
+  flex: 1; min-width: 140px; padding: 10px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: rgba(255,255,255,0.07);
+  color: var(--text); font-family: var(--font-body); font-size: 14px;
+  outline: none; transition: border-color 0.2s;
+}
+.alarm-label-input:focus { border-color: var(--accent); }
+.alarm-label-input::placeholder { color: var(--text-muted); }
+
+/* ── Mini clock (Alarm header) ── */
+.mini-clock   { display: flex; align-items: center; }
+.mini-digital { font-family: var(--font-mono); font-size: 15px; color: var(--accent); background: rgba(148,226,255,0.08); border: 1px solid rgba(148,226,255,0.2); border-radius: 8px; padding: 4px 10px; letter-spacing: 0.04em; }
+.mini-analog  { width: 48px; height: 48px; filter: drop-shadow(0 0 6px rgba(148,226,255,0.15)); }
+
+/* ── Alarm list ── */
+.alarm-list { display: flex; flex-direction: column; gap: 10px; }
+.alarm-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px 20px; backdrop-filter: blur(12px); transition: all 0.3s;
+}
+.alarm-item.disabled { opacity: 0.45; }
+.alarm-item.ringing  { border-color: var(--accent2); box-shadow: 0 0 0 2px rgba(255,107,107,0.3); animation: pulse 0.6s ease-in-out infinite alternate; }
+@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.01); } }
+.alarm-info         { display: flex; flex-direction: column; gap: 4px; }
+.alarm-time-display { font-family: var(--font-mono); font-size: 24px; color: var(--text); }
+.alarm-label-text   { font-size: 12px; color: var(--text-muted); }
+.alarm-controls     { display: flex; align-items: center; gap: 12px; }
+.empty-state        { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+
+/* ── Toggle switch ── */
+.toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 12px; transition: 0.3s; border: 1px solid var(--border); }
+.slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 2px; bottom: 2px; background: var(--text-muted); border-radius: 50%; transition: 0.3s; }
+.toggle-switch input:checked + .slider { background: rgba(148,226,255,0.2); border-color: var(--accent); }
+.toggle-switch input:checked + .slider::before { transform: translateX(20px); background: var(--accent); }
+
+/* ── Buttons ── */
+.btn-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.btn { padding: 11px 28px; border-radius: 10px; border: 1px solid transparent; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.02em; transition: all 0.2s; }
+.btn-primary { background: rgba(148,226,255,0.15); border-color: var(--accent);  color: var(--accent);  }
+.btn-success { background: rgba(107,255,184,0.12); border-color: var(--accent3); color: var(--accent3); }
+.btn-warning { background: rgba(255,200,107,0.12); border-color: #ffc86b;        color: #ffc86b;        }
+.btn-danger  { background: rgba(255,107,107,0.12); border-color: var(--accent2); color: var(--accent2); }
+.btn:hover   { filter: brightness(1.2); transform: translateY(-1px); }
+.btn:active  { transform: translateY(0); filter: brightness(0.95); }
+.btn-sm      { padding: 6px 12px; font-size: 12px; border-radius: 7px; }
+
+/* ── Status pill ── */
+.status-pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: rgba(255,255,255,0.07); color: var(--text-muted); border: 1px solid var(--border); }
+.status-pill.running { background: rgba(107,255,184,0.12); color: var(--accent3); border-color: rgba(107,255,184,0.3); }
+.status-pill.paused  { background: rgba(255,200,107,0.12); color: #ffc86b;        border-color: rgba(255,200,107,0.3); }
+.status-pill.done    { background: rgba(255,107,107,0.12); color: var(--accent2); border-color: rgba(255,107,107,0.3); }
+
+/* ── Alarm popup ── */
+.alarm-popup { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.popup-card { background: rgba(20,26,44,0.95); border: 1px solid rgba(255,107,107,0.4); border-radius: 24px; padding: 48px 56px; text-align: center; box-shadow: 0 0 60px rgba(255,107,107,0.25), var(--card-shadow); animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.popup-icon  { font-size: 52px; margin-bottom: 12px; animation: ring 0.5s ease infinite alternate; }
+@keyframes ring { from { transform: rotate(-12deg); } to { transform: rotate(12deg); } }
+.popup-title { font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent2); margin-bottom: 8px; }
+.popup-time  { font-family: var(--font-mono); font-size: 48px; color: #fff; margin-bottom: 6px; }
+.popup-label { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; }
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+  :root { --sidebar-w: 64px; }
+  .brand-name, .nav-label, .date-display { display: none; }
+  .global-toggle  { align-items: center; }
+  .gtoggle-btn    { padding: 6px; font-size: 14px; text-align: center; }
+  .nav-btn        { justify-content: center; padding: 12px; }
+  .nav-icon       { font-size: 20px; }
+  .content        { padding: 24px 16px; }
+  .card           { padding: 24px 18px; }
+  .sw-unit        { min-width: 62px; font-size: 32px; padding: 6px 8px; }
+  .sw-sep         { font-size: 30px; }
+  .time-field input { width: 64px; font-size: 22px; }
+  .alarm-input-row  { flex-direction: column; align-items: stretch; }
+  .alarm-time-input { width: 100%; }
+  .clock-svg, .ring-svg { width: 200px; height: 200px; }
+}
